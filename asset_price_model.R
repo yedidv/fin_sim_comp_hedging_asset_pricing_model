@@ -1,5 +1,5 @@
 rm(list = ls()) 
-setwd("~/Desktop/msba/spring2021/Fin_Computation_Simulation/hedging_asset_pricing_model")
+setwd("~/Desktop/msba/spring2021/fin_sim_comp_hedging_asset_pricing_model")
 library(tidyverse) 
 library(Matrix) 
 library(plotly) 
