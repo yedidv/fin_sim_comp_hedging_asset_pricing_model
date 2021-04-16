@@ -19,6 +19,7 @@ Read_Data <- function(random_sample,
     .[[1]] %>% 
     as_tibble()
   
+  set.seed(102) 
   ## Subset of the tickers. Get random sample 
   ticker_sample <- url %>% 
     ## Select Ticker Symbols
