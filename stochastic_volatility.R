@@ -1,4 +1,6 @@
-Stochastic.vol <- function(M, N, t, mu, alpha, b, volvol, S0, V0) {
+Stochastic.vol <- function(M, N, t,
+                           mu, alpha, b, 
+                           volvol, S0, V0) {
   dt <- t/N
   S <- V <- matrix(NA,ncol=N+1, nrow=M)
   S[,1] <- S0

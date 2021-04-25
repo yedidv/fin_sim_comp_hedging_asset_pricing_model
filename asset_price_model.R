@@ -1,5 +1,4 @@
 rm(list = ls()) 
-setwd("~/Desktop/msba/spring2021/fin_sim_comp_hedging_asset_pricing_model")
 library(tidyverse) 
 library(Matrix) 
 library(plotly) 
@@ -62,17 +61,22 @@ Read_Data <- function(random_sample,
     
   }
   
+  ## FRED risk free rate 
+  fred <- getSymbols('DGS3MO', src = 'FRED', auto.assign = F, 
+                     start = start_date, end = end_date) 
+  ## Dates for the risk free rate 
+  fred <- tibble(Date = index(fred), RF = as.vector(fred$DGS3MO) ) 
+  
+  ## inner join on prices df 
+  prices <- prices %>% inner_join(fred, by = 'Date') %>%
+  
+  ## fill in null values with previous values 
+    fill(RF, .direction = 'up') %>%
+  ## FRED RF rate is listed as a percent. Convert to decimal. 
+    mutate(RF = RF * 0.01) 
+  
+  
   return(prices) 
   
 }
-
-## random_sample is how many tickers we want from the sp500 
-prices <- Read_Data(random_sample = 3)  
-prices %>% head() 
-
-
-
-
-
-
 
