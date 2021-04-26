@@ -32,26 +32,18 @@ mu<- matrix(mean_rets, ncol  = 1)
 Sigma <- var(rets %>% select(-Date), use = 'complete.obs') 
 rho <- cor(rets %>% select(-Date), use = 'complete.obs') 
 sigma <- var(rets %>% select(-Date), use = 'complete.obs') 
-M <- 100 
-N <- 252 
+M <- 5 
+N <- 10 
 d <- n_stocks 
 t <- 1 
+## Strike Price listed as Last value of all stocks 
+K <- prices %>% select(-Date) %>% tail(1) %>% t() %>% mean() 
 ## Unable to start at appropriate starting prices 
 X0 <- prices %>% select(-Date) %>% tail(1) 
 ## Only works when start returns are at a arbritrary number 
 X0 <- prices %>% select(-Date) %>% tail(1) %>% t() %>% mean() 
 
-gmd_model <- Geom_Brownian(M, N, n_stocks, t, mu, X0, Sigma) 
-
-
-## Strike Price listed as mean value of all stocks (?) 
-K <- Single_Moment(price_moms, 'mean') %>% 
-            t() %>% 
-            mean() 
-
-
-
-
+gmd_model <- Geom_Brownian(M, N, n_stocks, t, mu, X0, Sigma * 252) 
 
 
 

@@ -56,19 +56,17 @@ Single_Moment <- function(moments, name){
 
 ## Black Scholes Pricing for options 
 Black_Scholes_Price <- function(S0, K, r, sigma, t){
-  d1 <- (log(S0 / K) + (r + sigma^2 / 2) * t) / (sigma * sqrt(t))
-  d2 <- d1 - sigma * sqrt(t) 
+  d1 <- (log(S0 / K) + (r + diag(sigma)^2 / 2) * t) / (diag(sigma) * sqrt(t))
+  d2 <- d1 - diag(sigma) * sqrt(t) 
   bls <- S0 * pnorm(d1) - K * exp(-r * t) * pnorm(d2) 
   return(bls) 
 }
 
 ## Delta Function 
-Delta <- function(S, K, r, t, sigma){
+Delta <- function(S,K,r,t,sigma){
   d <- pnorm((log(S/K) + 
-                (r + sigma * sigma / 2) * t) / (sigma * sqrt(t))) 
-  return(d) 
+                (r + sigma*sigma/2)*t)/(sigma*sqrt(t)))
+  return(d)
 }
-
-
 
 
