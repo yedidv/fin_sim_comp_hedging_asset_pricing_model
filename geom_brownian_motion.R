@@ -38,4 +38,4 @@ Geom_Brownian <- function(M, N, d, t, mu, X0, Sigma){
 }
 
 
-## Delta is change in stock vs change in price of underlying asset
+## Delta is change in option vs change in price of underlying asset
