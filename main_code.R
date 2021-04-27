@@ -3,17 +3,15 @@ library(tidyverse)
 library(Matrix) 
 library(plotly) 
 library(moments) 
-setwd("ba/fcs/project/fin_sim_comp_hedging_asset_pricing_model/fin_sim_comp_hedging_asset_pricing_model-main")
+setwd("~/Desktop/msba/spring2021/fin_sim_comp_hedging_asset_pricing_model")
 source('asset_price_model.r') 
 source('misc_funs.r') 
-source('stochastic_volatility.r')
 source('geom_brownian_motion.r') 
 
 
 
-
 ## Read the data #### 
-n_stocks <- 6
+n_stocks <- 2
 prices <- Read_Data(n_stocks)
 prices %>% head() 
 
@@ -34,10 +32,11 @@ mu<- matrix(mean_rets, ncol  = 1)
 Sigma <- var(rets %>% select(-Date), use = 'complete.obs') 
 rho <- cor(rets %>% select(-Date), use = 'complete.obs') 
 sigma <- var(rets %>% select(-Date), use = 'complete.obs') 
-M <- 10 ## Number of paths 
-N <- 13 ## number of time steps 
+M <- 5 ## Number of paths 
+N <- 7 ## number of time steps 
 d <- n_stocks 
-t <- 1 
+t <- 1
+r <- 0.05
 ## Strike Price listed as Last value of all stocks 
 K <- prices %>% select(-Date) %>% tail(1) %>% t() %>% mean() 
 ## Unable to start at appropriate starting prices 
@@ -45,33 +44,36 @@ X0 <- prices %>% select(-Date) %>% tail(1)
 ## Only works when start returns are at a arbritrary number 
 X0 <- prices %>% select(-Date) %>% tail(1) %>% t() %>% mean() 
 
+## Brownian Motion model. 
 gmd_model <- Geom_Brownian(M, N, n_stocks, t, mu, X0, Sigma) 
 
-gmd_model$Delta
-gmd_model$Option_Type
-gmd_model$X
+X <- gmd_model$X[,,2] 
+deltas <- gmd_model$Delta[,,2]
 
-snp <- getSymbols('^GSPC', src = 'yahoo', from = as.Date('2010-1-1'), 
-                  to = as.Date('2021-1-1'), auto.assign = F) 
-snp
-snp <- as.data.frame(snp)
 
-snp.ret <- diff(snp[,6])/lag(snp[,6])
-snp.ret
-rets <- as.data.frame(rets)
-prices <- as.data.frame(prices)
-a <- b <- S0 <- V0 <- volvol <- array(NA, dim=c(d))
-delts <- array(NA, dim=c(d,M))
-for(i in 1:d){
-  result <- lm(rets[,i+1]~snp.ret[2:2769])
-  a[i] <- result$coefficients[1]
-  b[i] <- result$coefficients[2]
-  V0[i] <- sd(rets[,i+1])
-  S0[i] <- prices[[i+1]][2768]
-  volvol[i] <- V0[i]*V0[i]
-  results<- Stochastic.deltas(M, N, d, t, mu[i], a[i], b[i], volvol[i], S0[i], V0[i])
-  delts[i,] <- results$Deltas
-  
+# Generate a matrix of positions:
+CF <- matrix(NA,ncol=N+1,nrow=M)
+CF[,1] <- -deltas[,1]*X0
+for (i in 1:(N-1)){
+  CF[,i+1] <- -1*(deltas[,i+1] - deltas[,i])*X[,i+1]
 }
 
-delts
+IN <- which(X[,N+1] > K)
+CF[IN,N+1] <- K - (1-deltas[IN,N])*X[IN,N+1]
+CF[-IN,N+1] <- deltas[-IN,N]*X[-IN,N+1]
+CF
+# 3. sum the costs:
+disc <- matrix(exp(-r*seq(0,t,length=N+1)),ncol=1)
+PV <- CF%*%disc
+PV
+bls <- BLS(M, N, X0, K, r, diag(Sigma)[2], t, mu )
+
+bls
+# compute performace
+H.perf <- sqrt(var(PV))/bls
+print(H.perf)
+
+
+
+
+
