@@ -20,8 +20,7 @@ Moments <- function(x){
     ## Kurtosis
     bind_rows(data_no_date %>% summarize_all(moments::kurtosis)) %>% 
     ## 
-    add_column('Moments' = c('mean', 'variance', 'skewness', 'kurtosis'), 
-               .before = 'SYY')
+    add_column('Moments' = c('mean', 'variance', 'skewness', 'kurtosis'))
   
   
   return(summary) 
@@ -66,14 +65,33 @@ eput <- function(S){
   return(p) 
 }
 
-Delta <- function(option, S, Sh){
+Delta <- function(option, S, Sh, h, t){
   ## Find the delta values 
   f0 <- option(S) 
   f0h <- option(Sh) 
-  fd <- exp(-0.05 * t) * mean(abs(f0h - f0) / 0.01) 
+  fd <-  mean(exp(-0.05 * t) * abs(f0h - f0) / h) 
+
   return(fd) 
 }
 
+## function to subtract costs and discount. 
+Cost_Fun <- function(X, N, t, fee, discount){
+  ## first subtract the cost of the transaction 
+  ## Then discount the net present value 
+  price <- X * (1 - fee)  
+  
+  price <- price / (1 + discount)^(N * t / 260) ## time (days) * number of periods / years 
+  return(price) 
+}
+
+BLS <- function(M,N,S0,K,r,sigma,t,mu){
+  print(N)
+  
+  d1 <- (log(S0/K) + (r + sigma*sigma/2)*t)/(sigma*sqrt(t))
+  d2 <- d1 - sigma*sqrt(t)
+  BLS <- S0*pnorm(d1) - K*exp(-r*t)*pnorm(d2)
+  return(BLS) 
+}
 
 
 
