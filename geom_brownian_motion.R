@@ -31,14 +31,18 @@ Geom_Brownian <- function(M, N, d, t, mu, X0, Sigma){
       ##take each individual stock 
       ind_stock_X <- X[,i + 1,j] 
       ind_stock_Xh <- Xh[,i + 1, j] 
+      print(ind_stock_Xh - ind_stock_X) 
       
+      ## Find the deltas for put and call options 
+      ## We take the max delta for eacH time step for each option 
+      ## create dataframe containing whether or not it's reccomended 
+      ## to put or call at that period in time. 
       call_delta <- Delta(eput, ind_stock_X, ind_stock_Xh) 
       put_delta <- Delta(ecall, ind_stock_X, ind_stock_Xh) 
       call_put[i,j] <- ifelse(call_delta > put_delta, 'call', 'put') 
       deltas[i,j] <- pmax(call_delta, put_delta) 
       
-      print(call_delta) 
-      
+
     }
     
     
