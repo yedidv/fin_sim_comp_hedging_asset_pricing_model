@@ -23,7 +23,7 @@ print(rho)
 # Define a function to simulate paths:
 myCEVD <- function(M,N,d,t,mu,X0,sigma,rho,alpha){
   # Generate 3-dim X array for results:
-  S.CEV <- array(NA,dim=c(M,N+1,d))
+  S.CEV <- deltas <- Z <- array(NA,dim=c(M,N+1,d))
   #S.Euler <- array(NA,dim=c(M,N+1,d))
   # Set initial values = X0:
   S.CEV[,1,] <- X0
@@ -34,6 +34,8 @@ myCEVD <- function(M,N,d,t,mu,X0,sigma,rho,alpha){
   # Run the simulation:
   for (i in 1:N){
     Zmat <- matrix(rnorm(d*M),ncol=M)
+    dim(Zmat) 
+    dim(B) 
     # Euler Scheme:
     # GBM :
     #S.Euler[,i+1,] <- S.Euler[,i,] + mu*S.Euler[,i,]*dt +
@@ -41,8 +43,17 @@ myCEVD <- function(M,N,d,t,mu,X0,sigma,rho,alpha){
     # CEV :
     S.CEV[,i+1,] <- S.CEV[,i,] + muMat*S.CEV[,i,]*dt +
       S.CEV[,i,]^alpha*sqrt(dt)*t(B%*%Zmat)
+    
+    Z[,i + 1,] <- Z
+    
+    ## Calculate deltas 
+    ttm <- t - dt *(i = 1) 
+    deltas[,i,] <- Delta(S.CEV[,i,], K, 0.05, ttm, diag(sigma))
+    
   }
-  return(S.CEV)
+  deltas[,N + 1,] <- Delta(S.CEV[,N + 1,], K, 0.05, 0, diag(sigma)) 
+  
+  return(list('X' = S.CEV, 'Z' = Z, 'Deltas' = deltas)) 
 }
 M <- 10000
 N <- 252
@@ -51,5 +62,7 @@ t <- 1
 X0 <- 100
 alpha <- 0.8
 sigma <- vol*X0^(1-alpha)
-X <- myCEVD(M,N,d,t,mu,X0,sigma,rho,alpha)
+X <- myCEVD(M,N,d,t,mu,X0,Sigma,rho,alpha)
+rho
+diag(Sigma) 
 

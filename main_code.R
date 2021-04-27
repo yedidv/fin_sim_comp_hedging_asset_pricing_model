@@ -32,8 +32,8 @@ mu<- matrix(mean_rets, ncol  = 1)
 Sigma <- var(rets %>% select(-Date), use = 'complete.obs') 
 rho <- cor(rets %>% select(-Date), use = 'complete.obs') 
 sigma <- var(rets %>% select(-Date), use = 'complete.obs') 
-M <- 5 
-N <- 10 
+M <- 10 ## Number of paths 
+N <- 13 ## number of time steps 
 d <- n_stocks 
 t <- 1 
 ## Strike Price listed as Last value of all stocks 
@@ -43,8 +43,10 @@ X0 <- prices %>% select(-Date) %>% tail(1)
 ## Only works when start returns are at a arbritrary number 
 X0 <- prices %>% select(-Date) %>% tail(1) %>% t() %>% mean() 
 
-gmd_model <- Geom_Brownian(M, N, n_stocks, t, mu, X0, Sigma * 252) 
+gmd_model <- Geom_Brownian(M, N, n_stocks, t, mu, X0, Sigma) 
 
-
+gmd_model$Delta
+gmd_model$Option_Type
+gmd_model$X
 
 
