@@ -24,13 +24,22 @@ Brown_Motion <- function(M, N, t, X0, mu, sigma, h = 0.01){
   )
 }
 
-myCEV <- function(M,N,r,sigma,t,S0,alpha){
+myCEV <- function(M,N,r,sigma,t,S0,alpha, h = 0.01){
   S.Euler <- matrix(NA,ncol=N+1,nrow=M)
-  S.CEV <- matrix(NA,ncol=N+1,nrow=M)
+  S.CEV <- deltas <-  matrix(NA,ncol=N+1,nrow=M)
   S.Euler[,1] <- S0
   S.CEV[,1] <- S0
+  deltas[,1] <- 0 
   dt <- t/N
   sqdt <- sqrt(dt)
+  
+  cev_fun <- function(S, h){
+    diff <- S + h 
+    return(
+      diff + r * diff * dt + sigma * diff^alpha*sqdt*Z
+    )
+  }
+  
   
   for (i in 1:N){
     # use a common Z to compare methods:
@@ -40,11 +49,18 @@ myCEV <- function(M,N,r,sigma,t,S0,alpha){
     S.Euler[,i+1] <- S.Euler[,i] + r*S.Euler[,i]*dt + 
       sigma*S.Euler[,i]*sqdt*Z
     
+
     # CEV:
-    S.CEV[,i+1] <- S.CEV[,i] + r*S.CEV[,i]*dt + 
-      sigma*S.CEV[,i]^alpha*sqdt*Z
+    S.CEV[,i+1] <- cev_fun(S.CEV[,i], 0) 
+    
+    ## finite differences 
+    forward <- cev_fun(S.CEV[,i], 0+h)
+    backward <- cev_fun(S.CEV[,i], 0-h) 
+    deltas[,i + 1] <- Delta(ecall, backward, forward, h, t) 
+    
+    
   }
-  S.out <- list("GBM"=S.Euler,"CEV"=S.CEV)
+  S.out <- list("GBM"=S.Euler,"X"=S.CEV, 'Delta' = deltas)
   return(S.out)
 }
 

@@ -6,7 +6,7 @@ library(moments)
 setwd("~/Desktop/msba/spring2021/fin_sim_comp_hedging_asset_pricing_model")
 source('asset_price_model.r') 
 source('misc_funs.r') 
-source('brownian_motion_2d.r') 
+source('models.r') 
 
 ## Read the data 
 n_stocks <- 1
@@ -28,7 +28,7 @@ mu <- as.numeric(Single_Moment(rets_moms, 'mean')[1] )
 rf <- as.numeric((prices %>% select(RF) %>% drop_na() %>% tail(1))[1])  
 rf
 t <- 1/52 ## initial time period (in years) 
-M <- 10 ## number of paths 
+M <- 1000 ## number of paths 
 N <- 52 ## numer time steps 
 
 
@@ -40,18 +40,21 @@ S0 <- K ## initial price is going to be labeled the same as strike price
 
 ## GBM Model 
 gbm_hedge <- Hedge_Performance(Brown_Motion, M, N, S0, mu, sigma) 
-t <- gbm_hedge$Time 
-gbm_model <- Brown_Motion(M, N, t, S0, mu, sigma) 
+t <- gbm_hedge$Time
+gbm_model <- Brown_Motion(M, N, t, S0, mu, sigma)
 deltas <- gbm_model$Deltas
-X <- gbm_model$X 
-#Price_Path_Plot(M, N, gbm_model$X) 
-#Log_Ret_Hist(gbm_model$X) 
-dgbm <- Delta_Perf(M, N, deltas, X) 
+X <- gbm_model$X
+
+gbm_hedge$Plot
+#Price_Path_Plot(M, N, gbm_model$X)
+#Log_Ret_Hist(gbm_model$X)
+dgbm <- Delta_Perf(M, N, t, deltas, X)
 dgbm$H.perf
 
-## CEV Model 
-cev_model <- myCEV(M, N, rf, sigma, t, S0, alpha = 0.8) 
-deltas <- cev_model$
+## CEV Model
+cev_model <- myCEV(M, N, rf, sigma, t, S0, alpha = 1.4)
+Log_Ret_Hist(cev_model$X) 
+Price_Path_Plot(M, N, cev_model$X) 
 
 
 

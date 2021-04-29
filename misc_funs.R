@@ -72,7 +72,7 @@ Delta <- function(option, S1, S2, h, t){
   ## Find the delta values 
   f1 <- option(S1) 
   f2 <- option(S2) 
-  fd <-  mean(exp(-0.05 * t) * abs(f2 - f1) / 2 * h) 
+  fd <-  mean(exp(-0.05 * t) * abs(f2 - f1) / h) 
 
   return(fd) 
 }
@@ -127,7 +127,7 @@ Log_Ret_Hist <- function(prices){
 
 
 ## Delta Hedge 
-Delta_Perf <- function(M, N, deltas, X){
+Delta_Perf <- function(M, N, t,deltas, X){
   
   ## Black Scholes for pricing 
   bls <- BLS(M, N, S0, K, sigma, t, mu) 
@@ -162,12 +162,12 @@ Hedge_Performance <- function(price_model, M, N, S0, mu, sigma){
                         perf = numeric() )
   for(i in 1:52){
     t <- i / 52 
-    
-    gbm_model <- price_model(M, N, t, S0, mu, sigma) 
-    deltas <- gbm_model$Deltas
-    X <- gbm_model$X 
-    dgbm <- Delta_Perf(M, N, deltas, X) 
-    
+    model <- price_model(M, N, t, S0, mu, sigma)
+    deltas <- model$Deltas
+    print(dim(deltas) ) 
+    X <- model$X 
+    dgbm <- Delta_Perf(M, N, t,deltas, X) 
+
     perf_metric <- perf_metric %>% add_row(time = i, 
                                            perf = dgbm$H.perf[1]) 
   }
