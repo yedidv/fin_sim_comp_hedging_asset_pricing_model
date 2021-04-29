@@ -42,7 +42,7 @@ delta.hedge <- function(M,N,S0,K,r,sigma,t,mu){
   
   d1 <- (log(S0/K) + (r + sigma*sigma/2)*t)/(sigma*sqrt(t))
   d2 <- d1 - sigma*sqrt(t)
-  BLS <- S0*pnorm(d1) - K*exp(-r*t)*pnorm(d2)
+  bls <- S0*pnorm(d1) - K*exp(-r*t)*pnorm(d2)
   
   # Plain vanilla call payoff function
   f <- function(S,K){
@@ -94,7 +94,11 @@ delta.hedge <- function(M,N,S0,K,r,sigma,t,mu){
   PV <- CF%*%disc
   
   # compute performace
-  H.perf <- sqrt(var(PV))/BLS
+  H.perf <- sqrt(var(PV))/bls
+  
+  print(sqrt(var(PV)))
+  print(bls) 
+  print(H.perf) 
   outlist <- list("H.perf"=H.perf,"PV"=PV,"BLS"=BLS)
   return(outlist)
 }
@@ -112,4 +116,4 @@ for (j in 1:length(N)){
 
 print(H)
 print(PV)
-print(tmp$BLS)
+print(tmp$H.perf)

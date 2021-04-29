@@ -2,15 +2,18 @@ Stochastic.deltas<- function(M, N, d, t, mu, a, b, volvol, S0, V0){
   ## change in time 
   dt <- t / N 
   sqdt <- sqrt(dt) 
-  S <- V <- Sh <- array(NA, dim = c(M, N + 1)) 
+  S <- V <- Sh <- array(NA, dim = c(M, N + 1, d)) 
   
   ## Set initial values 
   S[,1] <- Sh[,1] <- S0 
   V[,1] <- V0 
   
+  h <- 0.1
+  
   ## Simulate paths 
   for(i in 1:N){
-    Z1 <- Z2 <- matrix(rnorm(M), ncol = 1) 
+    Z1 <- matrix(rnorm(M), ncol = 1) 
+    Z2 <- matrix(rnorm(M), ncol = 1) 
     
     S[,i+1] <- S[,i] + mu*S[,i]*dt + sqrt(V[,i])*S[,i]*sqdt*Z1
     

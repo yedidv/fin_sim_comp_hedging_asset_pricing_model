@@ -18,7 +18,7 @@ Read_Data <- function(random_sample,
     .[[1]] %>% 
     as_tibble()
   
-  set.seed(102) 
+  set.seed(109) 
   ## Subset of the tickers. Get random sample 
   ticker_sample <- url %>% 
     ## Select Ticker Symbols
@@ -37,7 +37,7 @@ Read_Data <- function(random_sample,
     ## and join with dataframe
     
     tic <- getSymbols(i, src = 'yahoo', start = start_date, 
-                      end = end_date, auto.assign = F) 
+                      end = end_date, auto.assign = F, periodicity = 'monthly')  
     ## Extract the date 
     date <- index(tic) 
     tic <- as_tibble(tic) ## Convert to tibble 
@@ -73,8 +73,12 @@ Read_Data <- function(random_sample,
   ## fill in null values with previous values 
     fill(RF, .direction = 'up') %>%
   ## FRED RF rate is listed as a percent. Convert to decimal. 
-    mutate(RF = RF * 0.01) 
-  
+    mutate(RF = RF * 0.01) %>% 
+    ## Find the returns by year and take the first return 
+    mutate(month = format(Date, '%m'), year = format(Date, '%Y')) %>% 
+    arrange(year, month) %>%
+    group_by(year) %>% summarize_all(first) %>% 
+    select(-month, -year) 
   
   return(prices) 
   

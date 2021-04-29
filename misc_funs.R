@@ -5,6 +5,10 @@ Annualize <- function(x){
   return(rets) 
 }
 
+Log_Rets <- function(x){
+  return(log(x + 1)) 
+}
+
 ## Formulas to find moments 
 Moments <- function(x){
   ### Find the moments 
@@ -25,15 +29,17 @@ Moments <- function(x){
   
   return(summary) 
 }
-
+## Formula for returns on stocks
+Rets_Formula <- function(x){
+  rets <- (x - lag(x)) / lag(x) 
+  return(rets) 
+}
 ## Functions for returns 
 Returns <- function(prices){
   
-  ## Formula for returns on stocks
-  Rets_Formula <- function(x){
-    rets <- (x - lag(x)) / lag(x) 
-    return(rets) 
-  }
+
+  
+
   
   ## Prices to returns function 
   rets <- prices %>% select(-RF) %>% 
@@ -65,11 +71,11 @@ eput <- function(S){
   return(p) 
 }
 
-Delta <- function(option, S, Sh, h, t){
+Delta <- function(option, S1, S2, h, t){
   ## Find the delta values 
-  f0 <- option(S) 
-  f0h <- option(Sh) 
-  fd <-  mean(exp(-0.05 * t) * abs(f0h - f0) / h) 
+  f1 <- option(S1) 
+  f2 <- option(S2) 
+  fd <-  mean(exp(-0.05 * t) * abs(f2 - f1) / 2 * h) 
 
   return(fd) 
 }
@@ -85,14 +91,67 @@ Cost_Fun <- function(X, N, t, fee, discount){
 }
 
 BLS <- function(M,N,S0,K,r,sigma,t,mu){
-  print(N)
+
   
   d1 <- (log(S0/K) + (r + sigma*sigma/2)*t)/(sigma*sqrt(t))
   d2 <- d1 - sigma*sqrt(t)
-  BLS <- S0*pnorm(d1) - K*exp(-r*t)*pnorm(d2)
-  return(BLS) 
+  bls <- S0*pnorm(d1) - K*exp(-r*t)*pnorm(d2)
+  return(bls) 
 }
 
 
+## Plot for potential stock prices 
+Price_Path_Plot <- function(M, N, X){
+  plt <- plot_ly(x = seq(1, N + 1), type = 'scatter', 
+                 mode = 'lines', y = X[1,], 
+                 showlegend = F) 
+  for(i in 2:M){
+    plt <- plt %>% 
+      add_trace(y = X[i,], 
+                type = 'scatter', mode = 'lines')
+  }
+  return(plt) 
+}
+
+Log_Ret_Hist <- function(prices){
+  ## Calculate log returns for all the returns 
+  ## and plot the frequency histogram
+  new_rets <- as_tibble(as_tibble((prices)) %>% t() ) %>% 
+    mutate_all(Rets_Formula) %>% 
+    mutate_all(Log_Rets) %>% 
+    drop_na() %>% flatten()
+  
+  return(plot_ly(x = new_rets, type = 'histogram') ) 
+}
+
+
+## Delta Hedge 
+Delta_Perf <- function(M, N, deltas, X){
+  
+  ## Black Scholes for pricing 
+  bls <- BLS(M, N, S0, K, sigma, t, mu) 
+  ## Generate matrix of positions 
+  CF <- matrix(NA, ncol = N + 1, nrow = M) 
+  CF[,1] <- -deltas[,1] * S0 
+  for(i in 1:(N - 1)){
+    CF[,i+1] <- -1*(deltas[,i+1] - deltas[,i])*X[,i+1]
+  }
+  
+  IN <- which(X[,N+1] > K)
+  CF[IN,N+1] <- K - (1-deltas[IN,N])*X[IN,N+1]
+  CF[-IN,N+1] <- deltas[-IN,N]*X[-IN,N+1]
+  
+  # 3. sum the costs:
+  disc <- matrix(exp(-rf*seq(0,t,length=N+1)),ncol=1)
+  PV <- CF%*%disc * 0.99
+  
+  # compute performace
+  
+  H.perf <- sqrt(var(PV))/bls
+  print(sqrt(var(PV)))
+  print(bls) 
+  print(H.perf) 
+  return(list("H.perf"=H.perf,"PV"=PV,"BLS"=bls, 'CF' = CF))
+}
 
 
