@@ -40,14 +40,23 @@ S0 <- K ## initial price is going to be labeled the same as strike price
 
 ## GBM Model 
 gbm_hedge <- Hedge_Performance(Brown_Motion, M, N, S0, mu, sigma) 
-
+t <- gbm_hedge$Time 
 gbm_model <- Brown_Motion(M, N, t, S0, mu, sigma) 
 deltas <- gbm_model$Deltas
 X <- gbm_model$X 
 #Price_Path_Plot(M, N, gbm_model$X) 
 #Log_Ret_Hist(gbm_model$X) 
-
-
-
 dgbm <- Delta_Perf(M, N, deltas, X) 
 dgbm$H.perf
+
+## CEV Model 
+cev_model <- myCEV(M, N, rf, sigma, t, S0, alpha = 0.8) 
+deltas <- cev_model$
+
+
+
+
+
+
+
+
