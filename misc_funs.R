@@ -108,7 +108,7 @@ Price_Path_Plot <- function(M, N, X){
                 type = 'scatter', mode = 'lines')
   }
   
-  plt <- plt %>% layout(title = 'Potential Price Paths')
+  plt <- plt %>% layout(title = 'Potential Price Paths (Alpha = 0.8)') 
   return(plt) 
 }
 

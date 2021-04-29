@@ -9,7 +9,10 @@ Brown_Motion <- function(M, N, t, X0, mu, sigma, h = 0.01){
   
   ## run simulation 
   for(i in 1:N){
-    Z <- rnorm(M) 
+    Z <- rnorm(M)
+    
+    
+    
     X[,i + 1] <- X[,i] * exp(musim * dt + sigma * sqrt(dt) * Z) 
     
     ## Finite differences 
@@ -25,6 +28,7 @@ Brown_Motion <- function(M, N, t, X0, mu, sigma, h = 0.01){
 }
 
 CEV <- function(M,N,t, X0, mu, sigma, alpha = 0, h = 0.01){
+  print(M) 
   S.Euler <- matrix(NA,ncol=N+1,nrow=M)
   S.CEV <- deltas <-  matrix(NA,ncol=N+1,nrow=M)
   S.Euler[,1] <- S0
@@ -60,7 +64,7 @@ CEV <- function(M,N,t, X0, mu, sigma, alpha = 0, h = 0.01){
     
     
   }
-  S.out <- list("GBM"=S.Euler,"X"=S.CEV, 'Delta' = deltas)
+  S.out <- list("GBM"=S.Euler,"X"=S.CEV, 'Deltas' = deltas)
   return(S.out)
 }
 

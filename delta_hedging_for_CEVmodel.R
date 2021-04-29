@@ -91,7 +91,7 @@ delta.hedge <- function(M,N,S0,K,r,sigma,t,mu){
   
   # 3. sum the costs:
   disc <- matrix(exp(-r*seq(0,t,length=N+1)),ncol=1)
-  PV <- CF%*%disc
+  PV <- (CF * 0.99)%*%disc
   
   # compute performace
   H.perf <- sqrt(var(PV))/bls
@@ -108,8 +108,10 @@ delta.hedge <- function(M,N,S0,K,r,sigma,t,mu){
 N <- c(4,5,10,20,40,80)
 H <- c(NA)
 PV <- c(NA)
-for (j in 1:length(N)){
-  tmp <- delta.hedge(M,N[j],S0,K,r,sigma,t,mu)
+for (j in 1:50){
+  print(j) 
+  alpha = 0.8
+  tmp <- delta.hedge(M,52,S0,K,r,sigma, round(j / 52),mu)
   H[j] <- tmp$H.perf
   PV[j] <- mean(tmp$PV)
 }
@@ -117,3 +119,4 @@ for (j in 1:length(N)){
 print(H)
 print(PV)
 print(tmp$H.perf)
+H

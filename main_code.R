@@ -26,7 +26,7 @@ rets_moms
 sigma <- as.numeric(var(rets %>% select(-Date), use = 'complete.obs')[1])
 mu <- as.numeric(Single_Moment(rets_moms, 'mean')[1] ) 
 rf <- as.numeric((prices %>% select(RF) %>% drop_na() %>% tail(1))[1])  
-r <- rf
+r <- rf <- 0.05
 t <- 1/52 ## initial time period (in years) 
 M <- 100 ## number of paths 
 N <- 52 ## numer time steps 
@@ -52,13 +52,22 @@ dgbm <- Delta_Perf(M, N, t, deltas, X)
 dgbm$H.perf
 
 ## CEV Model
-cev_model <- CEV(M, N, sigma, t, S0, alpha = 0)
-Log_Ret_Hist(cev_model$X) 
+source('misc_funs.r') 
+cev_model <- CEV(M, N, t, S0, mu, sigma, alpha = 1.3)
 Price_Path_Plot(M, N, cev_model$X) 
+cev_model <- myCEV(M, N, rf, sigma, t, S0, alpha = 1) 
+Price_Path_Plot(M, N, cev_model$S.CEV) 
+Log_Ret_Hist(cev_model$X) 
+
+
+source('models.r') 
+cev_hedge <- Hedge_Performance(CEV, M, N, S0, mu, sigma) 
+
+cev_hedge$Plot
 
 
 
-
+dim(cev_model$Deltas) 
 
 
 
