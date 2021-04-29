@@ -24,7 +24,7 @@ Brown_Motion <- function(M, N, t, X0, mu, sigma, h = 0.01){
   )
 }
 
-myCEV <- function(M,N,r,sigma,t,S0,alpha, h = 0.01){
+CEV <- function(M,N,t, X0, mu, sigma, alpha = 0, h = 0.01){
   S.Euler <- matrix(NA,ncol=N+1,nrow=M)
   S.CEV <- deltas <-  matrix(NA,ncol=N+1,nrow=M)
   S.Euler[,1] <- S0

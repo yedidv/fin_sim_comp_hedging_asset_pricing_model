@@ -120,8 +120,9 @@ Log_Ret_Hist <- function(prices){
     mutate_all(Log_Rets) %>% 
     drop_na() %>% flatten()
   
-  return(plot_ly(x = new_rets, type = 'histogram') %>% 
-           layout(title= 'Log Returns Distribution')
+  return(list('Plot' = plot_ly(x = new_rets, type = 'histogram') %>% 
+           layout(title= 'Log Returns Distribution'), 
+           'log_rets' = new_rets)
            ) 
 }
 
