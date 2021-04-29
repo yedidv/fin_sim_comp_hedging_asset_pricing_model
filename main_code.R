@@ -27,8 +27,8 @@ sigma <- as.numeric(var(rets %>% select(-Date), use = 'complete.obs')[1])
 mu <- as.numeric(Single_Moment(rets_moms, 'mean')[1] ) 
 rf <- as.numeric((prices %>% select(RF) %>% drop_na() %>% tail(1))[1])  
 rf
-t <- 2 / 52 ## initial time period (in years) 
-M <- 1000 ## number of paths 
+t <- 1/52 ## initial time period (in years) 
+M <- 10 ## number of paths 
 N <- 52 ## numer time steps 
 
 
@@ -36,15 +36,18 @@ N <- 52 ## numer time steps
 K <- as.numeric((prices %>% select(-Date, -RF) %>% tail(1))[1])
 S0 <- K ## initial price is going to be labeled the same as strike price
 
+
+
 ## GBM Model 
+gbm_hedge <- Hedge_Performance(Brown_Motion, M, N, S0, mu, sigma) 
+
 gbm_model <- Brown_Motion(M, N, t, S0, mu, sigma) 
 deltas <- gbm_model$Deltas
 X <- gbm_model$X 
-Price_Path_Plot(M, N, gbm_model$X) 
-Log_Ret_Hist(gbm_model$X) 
+#Price_Path_Plot(M, N, gbm_model$X) 
+#Log_Ret_Hist(gbm_model$X) 
 
 
 
 dgbm <- Delta_Perf(M, N, deltas, X) 
 dgbm$H.perf
-dgbm$CF

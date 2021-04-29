@@ -38,9 +38,6 @@ Rets_Formula <- function(x){
 Returns <- function(prices){
   
 
-  
-
-  
   ## Prices to returns function 
   rets <- prices %>% select(-RF) %>% 
     ## Apply returns, function to adjusted prices 
@@ -110,6 +107,8 @@ Price_Path_Plot <- function(M, N, X){
       add_trace(y = X[i,], 
                 type = 'scatter', mode = 'lines')
   }
+  
+  plt <- plt %>% layout(title = 'Potential Price Paths')
   return(plt) 
 }
 
@@ -121,7 +120,9 @@ Log_Ret_Hist <- function(prices){
     mutate_all(Log_Rets) %>% 
     drop_na() %>% flatten()
   
-  return(plot_ly(x = new_rets, type = 'histogram') ) 
+  return(plot_ly(x = new_rets, type = 'histogram') %>% 
+           layout(title= 'Log Returns Distribution')
+           ) 
 }
 
 
@@ -143,15 +144,41 @@ Delta_Perf <- function(M, N, deltas, X){
   
   # 3. sum the costs:
   disc <- matrix(exp(-rf*seq(0,t,length=N+1)),ncol=1)
-  PV <- CF%*%disc * 0.99
+  PV <- (CF * 0.99)%*%disc 
   
   # compute performace
   
   H.perf <- sqrt(var(PV))/bls
-  print(sqrt(var(PV)))
-  print(bls) 
+  # print(PV) 
+  # print(sqrt(var(PV)))
+  # print(bls) 
   print(H.perf) 
   return(list("H.perf"=H.perf,"PV"=PV,"BLS"=bls, 'CF' = CF))
 }
+
+Hedge_Performance <- function(price_model, M, N, S0, mu, sigma){
+  
+  perf_metric <- tibble(time = numeric(), 
+                        perf = numeric() )
+  for(i in 1:52){
+    t <- i / 52 
+    
+    gbm_model <- price_model(M, N, t, S0, mu, sigma) 
+    deltas <- gbm_model$Deltas
+    X <- gbm_model$X 
+    dgbm <- Delta_Perf(M, N, deltas, X) 
+    
+    perf_metric <- perf_metric %>% add_row(time = i, 
+                                           perf = dgbm$H.perf[1]) 
+  }
+  
+  metric_plot <- plot_ly(perf_metric, x= ~time, y = ~perf, 
+                         type = 'scatter', mode = 'lines', color = 'red') %>% 
+    layout(title = 'Hedge Performance') 
+  
+  max_i <- max(perf_metric$time)
+  return(list('Plot' = metric_plot, 'Time' = max_i)) 
+  
+} 
 
 
