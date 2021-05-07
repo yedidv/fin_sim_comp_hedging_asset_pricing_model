@@ -3,14 +3,14 @@ library(tidyverse)
 library(Matrix) 
 library(plotly) 
 library(moments) 
-setwd("F:/Spring/Financial computation and simulation")
+#setwd("F:/Spring/Financial computation and simulation")
 source('asset_price_model.r') 
 source('misc_funs.r') 
 
 set.seed(2654)
 ## Read the data #### 
 n_stocks <- 1
-prices <- Read_Data()
+prices <- Read_Data(n_stocks)
 prices %>% head() 
 
 ## Calculate Returns 
@@ -26,8 +26,8 @@ mean_rets <- Single_Moment(rets_moms, 'mean') %>%
   t()
 mu<- as.numeric(matrix(Annualize(mean_rets), ncol  = 1))  
 vol <- as.numeric(Annualize(var(rets %>% select(-Date), use = 'complete.obs')))
-S0 <- as.numeric(prices %>% select(MMM) %>% tail(1)%>% t())
-K <- as.numeric(prices %>% select(MMM) %>% tail(1) %>% t()) +5
+S0 <- as.numeric(prices %>% select(-Date, -RF) %>% tail(1)%>% t())
+K <- as.numeric(prices %>% select(-Date, -RF) %>% tail(1) %>% t()) +5
 r <- 0.05
 alpha <- 1
 sigma <- vol*S0^(1-alpha)

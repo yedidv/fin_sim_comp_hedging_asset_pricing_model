@@ -72,7 +72,7 @@ Delta <- function(option, S1, S2, h, t){
   ## Find the delta values 
   f1 <- option(S1) 
   f2 <- option(S2) 
-  fd <-  mean(exp(-0.05 * t) * abs(f2 - f1) / h) 
+  fd <-  mean(exp(-0.05 * t) * abs(f2 - f1) / (2 * h) )  
 
   return(fd) 
 }
@@ -160,7 +160,8 @@ Delta_Perf <- function(M, N, t,deltas, X){
 Hedge_Performance <- function(price_model, M, N, S0, mu, sigma){
   
   perf_metric <- tibble(time = numeric(), 
-                        perf = numeric() )
+                        perf = numeric(), 
+                        P = numeric())
   for(i in 1:52){
     t <- i / 52 
     model <- price_model(M, N, t, S0, mu, sigma)
@@ -170,7 +171,8 @@ Hedge_Performance <- function(price_model, M, N, S0, mu, sigma){
     dgbm <- Delta_Perf(M, N, t,deltas, X) 
 
     perf_metric <- perf_metric %>% add_row(time = i, 
-                                           perf = dgbm$H.perf[1]) 
+                                           perf = dgbm$H.perf[1], 
+                                           P = mean(dgbm$PV)) 
   }
   
   metric_plot <- plot_ly(perf_metric, x= ~time, y = ~perf, 
@@ -178,7 +180,7 @@ Hedge_Performance <- function(price_model, M, N, S0, mu, sigma){
     layout(title = 'Hedge Performance') 
   
   max_i <- max(perf_metric$time)
-  return(list('Plot' = metric_plot, 'Time' = max_i)) 
+  return(list('Plot' = metric_plot, 'Time' = max_i, 'PV' = perf_metric)) 
   
 } 
 
